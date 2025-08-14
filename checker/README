@@ -1,0 +1,55 @@
+TRIFAN BOGDAN-CRISTIAN , 312CD, TEMA 2
+
+
+STRUCTURI DE DATE
+	culoare -> retine trei valori de tipul 'unsigned char' pentru codul RGB (RED - GREEN - BLUE)
+	nod_arbrore -> un nod din arbore, retine :
+			- latura subpatratului
+			- coordonatele coltului stanga-sus
+			- tipul nodului (0 = nod intern / radacina, 1 = nod de tip frunza)
+			- culoarea din subpatrat
+			- 4 fii (daca tipul nodului = 4, atunci fiecare fiu va fi NULL, altfel vor fi nenuli)
+			
+	
+CERINTELE 1 & 2
+		
+	Primele doua cerinte au un input comun, iar jumatate din solutia acestora reprezinta prelucrarea corecta a datelor de intrare. Noi primim o matrice, pe care trebuie sa o impartim in submatrici patratice, pana cand mean-ul pixelilor este mai mic sau egal decat factorul primit drept parametru. Cum putem face asta? Prin recuranta : luam matricea mare (are o lungime si ne intereseaza si coordonatele colultului stanga sus) si calculam valoarea 'mean'-ului. Daca este mai mica sau egala, atunci nodul este frunza, altfel 'impartim' matricea in 4 submatrici si injumatatim lungimea matricii : primul fiu -> matricea stanga sus, al doilea fiul -> matricea drepata-sus, al treila fiu -> matricea stanga-jos, al patrulea fiu -> matricea dreapta-jos (daca se intampla ca unul dintre fii sa aiba latura egala cu 1, atunci este nod frunza). Vom repeta procesul pe fiecare fiu pana cand nu mai exista submatrice cu 'mean'-ul mai mare decat valoarea factorului.
+	In acest README, voi nota P(x, y, dim) patratul de latura 'dim', cu coordonatele coltului stanga-sus din matricea imaginii egale cu perechea (x, y)
+	Ordinea si informatiile fiilor unui nod
+		fiul unu : x = x_parinte; y = y_parinte; dim = dim_parinte/2;
+		fiul doi : x = x_parinte; y = y_parinte + dim_parinte/2; dim = dim_parinte/2;
+		fiul trei : x = x_parinte + dim_parinte/2; y = y_parinte + dim_parinte/2; dim = dim_parinte/2;
+		fiul patru : x = x_parinte + dim_parinte/2; y = y_parinte; dim = dim_parinte/2;
+		
+		
+					|
+					|	mean(P(x, y, dim)) <= factor , atunci nodul este frunza (patratul P(x, y, dim) nu mai trebuie impartim)
+					|
+					|	
+constructie_arbore(P(x, y, dim)) -> 	|       
+					|
+					|
+					|	mean(P(x, y, dim)) > factor, atunci nodul nu este nod terminal (patratul P(x, y, dim) trebuie impartit in 4 zone)
+					|	constructie_arbore(P(   x   ,    y,    dim/2)) 
+					|	constructie_arbore(P(   x   , y+dim/2, dim/2)) 
+					|	constructie_arbore(P(x+dim/2, y+dim/2, dim/2))
+					|	constructie_arbore(P(x+dim/2,    y,    dim/2)) 
+					|		
+
+
+	Astfel, fiecare nod frunza va face refire la cate un subpatrat, pentru care 'mean'- ul este mai mic sau egal decat factorul.
+CERINTA 1
+    Cele trei numere cerute de primul task reprezinta :
+    	- numarul de nivele ale arborelui
+    	- numarul de frunze ale arborelui
+    	- lungimea maxima a laturilor subpatratelor
+    	
+    Pentru a afla fiecare dintre cele trei valori, am optat pentru cate un subrpogram recursiv care parcurge in adancime arobrele (DFS). Nodul este frunza daca fiii lui sunt toti NULL.
+  
+CERINTA 2
+	Ni se cere parcurgurgere in latime (DFS) a arborelui, adica : accesarea radacinii, apoi a fiecararui nod de la stanga la drepata de pe primul nivel, apo a fiecarui nod de la stanga la dreapta de pe al doilea nivel s.a.m.d.
+	Pentru fiecare nod accesat vom afisa (pe o singura linie) tipul, iar daca nodul sa intampla sa fie si frunza, vom afisa codul RGB asociat subpatratului.
+	
+CERITA 3
+	Fisierul de intrare contine lungime = latimea imaginii pe care trebuie sa o obtinem si informatii depsre fiecare nod din arbore dupa parcurgerea acestuia in latime (BFS) : tipul si RGB-urile nodurilor frunza. Mai exact, fisierul contine aceste date despre radacina, apoi despre fiecare nod luat de la stanga la dreapta de pe fiecare nivel, ca mai apoi eu sa reconstruiesc arborele (reconstructia arborelui reprezinta cea mai mare mare parte din solutie). Dupa aceea, folosind fiecare nod frunza, vom colora toate diviziunile, deci trebuie sa aflam coordonatele coltului stanga-sus si lungimea patratului.
+	Pentru afisarea imaginii, respectam formatul de input de la primele doua cerinte : pe prima linie scriem 'P6', pe doua scriem de doua ori lungimea imaginii, despartite printr-un spatiu, pe a treia linie 255 (valoarea maxima pe care unei valori din setul RGB), iar pe a treia, culorile fiecarui pixel.

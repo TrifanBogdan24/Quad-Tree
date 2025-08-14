@@ -1,0 +1,12 @@
+==6391== 16 bytes in 1 blocks are definitely lost in loss record 1 of 2
+==6391==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==6391==    by 0x1099ED: creare_coada (struct_coada.h:28)
+==6391==    by 0x10A96E: solve_cerinta_trei (tema-2.c:293)
+==6391==    by 0x10AF3E: main (tema-2.c:411)
+==6391== 
+==6391== 56 bytes in 1 blocks are definitely lost in loss record 2 of 2
+==6391==    at 0x483B7F3: malloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==6391==    by 0x10926B: create_nod_arbore (struct_arbore.h:42)
+==6391==    by 0x10A965: solve_cerinta_trei (tema-2.c:292)
+==6391==    by 0x10AF3E: main (tema-2.c:411)
+==6391== 
