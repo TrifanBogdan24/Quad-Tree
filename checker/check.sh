@@ -16,7 +16,10 @@ bonus=0
 depunctari=0
 ZERO=0
 VALGRIND="valgrind --leak-check=full --track-origins=yes -q --log-file=rezultat_valgrind.txt"
+cd ../src
 make build > /dev/null 2>&1
+mv ./quadtree ../checker
+cd ../checker
 var=10
 BEST=80
 FACTORS=(0 1000 0 3000 100 700 0 10 100 1000 50 300 0 2000 2500 5000 500 3000 0 2000)
@@ -142,4 +145,6 @@ if (( total == BEST )); then
 else
 	echo "Ai acumulat "$result"p din maxim 80p! :("
 fi
+cd ../src/
 make clean > /dev/null 2>&1
+cd ../checker/
