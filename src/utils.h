@@ -25,7 +25,7 @@ typedef struct {
 
 
 typedef struct TreeNode {
-    unsigned int x, y, size;
+    unsigned int x, y, size;                // Grid info
     Color color;
     struct TreeNode *child_upper_left;     // Child 1
     struct TreeNode *child_upper_right;    // Child 2
@@ -135,7 +135,7 @@ void queue_push(Queue **queue, QuadTree *root)
     }
 
     // Non-empty queue
-    (*queue)->tail = new_list_node(root);
+    (*queue)->tail->next = new_list_node(root);
     (*queue)->tail = (*queue)->tail->next;
 }
 

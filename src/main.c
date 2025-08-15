@@ -71,6 +71,7 @@ RawImage read_PPM_image(FILE *fin)
 
 
 
+
 QuadTree *compress_image(RawImage *img, int factor)
 {
     QuadTree *root = new_tree_node(0, 0, img->height);
@@ -128,6 +129,7 @@ void solve_task1(int factor, FILE *fin, FILE *fout)
         queue_push(&queue, node->child_lower_left);
     }
 
+
     free(queue);
     fprintf(fout, "%d\n", get_tree_height(root) + 1);
     fprintf(fout, "%d\n", num_leaves);
@@ -142,6 +144,8 @@ void solve_task2(int factor, FILE *fin, FILE *fout)
 
     Queue *queue = new_empty_queue();
     queue_push(&queue, root);
+
+    fwrite(&img.width, sizeof(unsigned int), 1, fout);
 
     while (!is_empty(queue)) {
         QuadTree *node = queue_pop(queue);
@@ -161,10 +165,89 @@ void solve_task2(int factor, FILE *fin, FILE *fout)
 
 }
 
+void write_PMM_image(RawImage *img, FILE *fout)
+{
+    fprintf(fout, "P6\n");
+    fprintf(fout, "%u %u\n255\n", img->width, img->height);
+
+    for (int i = 0; i < img->height; i++) {
+        for (int j = 0; j < img->width; j++) {
+            fwrite(&img->grid[i][j].R, sizeof(unsigned char), 1, fout);
+            fwrite(&img->grid[i][j].G, sizeof(unsigned char), 1, fout);
+            fwrite(&img->grid[i][j].B, sizeof(unsigned char), 1, fout);
+        }
+    }
+}
+
+
+int queue_size(Queue *queue) {
+    int num = 0;
+    for (List *iter = queue->head; iter; iter = iter->next) {
+        num++;
+    }
+    return num;
+}
+
 void solve_task3(FILE *fin, FILE *fout)
 {
     // TODO
+    RawImage img;
+    img.max_rgb = 255;
 
+
+    unsigned int grid_size = 0;
+    fread(&grid_size, sizeof(unsigned int), 1, fin);
+
+    img.height = grid_size;
+    img.width  = grid_size;
+
+    img.grid = (Color **) malloc(img.height * sizeof(Color *));
+    for (int i = 0; i < img.height; i++)
+        img.grid[i] = (Color *) calloc(img.width, sizeof(Color));
+    
+    QuadTree *root = new_tree_node(0, 0, grid_size);
+    
+    Queue *queue = new_empty_queue();
+    queue_push(&queue, root);
+
+    while (!is_empty(queue)) {
+        QuadTree *node = queue_pop(queue);
+
+        unsigned char node_type = 0;
+        fread(&node_type, sizeof(unsigned char), 1, fin);
+
+        unsigned int x = node->x;
+        unsigned int y = node->y;
+        unsigned int size = node->size;
+
+
+        if (node_type == 1) {
+            // Leaf node
+            Color color;
+            fread(&color.R, sizeof(unsigned char), 1, fin);
+            fread(&color.G, sizeof(unsigned char), 1, fin);
+            fread(&color.B, sizeof(unsigned char), 1, fin);
+
+            for (int i = x; i < x + size; i++)
+                for (int j = y; j < y + size; j++)
+                    img.grid[i][j] = color;
+        } else {
+            // Non-leaf node
+            node->child_upper_left  = new_tree_node(x         , y         , size/2);
+            node->child_upper_right = new_tree_node(x + size/2, y         , size/2);
+            node->child_lower_right = new_tree_node(x + size/2, y + size/2, size/2);
+            node->child_lower_left  = new_tree_node(x         , y + size/2, size/2); 
+
+            queue_push(&queue, node->child_upper_left);
+            queue_push(&queue, node->child_upper_right);
+            queue_push(&queue, node->child_lower_right);
+            queue_push(&queue, node->child_lower_left);
+        }
+
+    }
+
+
+    write_PMM_image(&img, fout);
 }
 
 
@@ -205,7 +288,7 @@ int main(int argc, char *argv[])
     check_command_line_arguments(argc, argv);
 
     FILE *fin = fopen(argv[argc - 2], "rb");    // Read binary
-    FILE *fout = fopen(argv[argc - 1], "wt");   // Write text
+    FILE *fout;
 
     if (!fin) {
         fprintf(stderr, "[ERR] Failed to open '%s' file\n", argv[argc - 2]);
@@ -213,14 +296,21 @@ int main(int argc, char *argv[])
     }
 
     if (!strcmp(argv[1], "-c1")) {
+        fout = fopen(argv[argc - 1], "wt");   // Write text
         int factor = atoi(argv[2]);
         solve_task1(factor, fin, fout);
     }
     else if (!strcmp(argv[1], "-c2")) {
+        fout = fopen(argv[argc - 1], "wb");   // Write binary
         int factor = atoi(argv[2]);
         solve_task2(factor, fin, fout);
-    } else if (!strcmp(argv[1], "-d"))
+    } else if (!strcmp(argv[1], "-d")) {
+        fout = fopen(argv[argc - 1], "wb");   // Write binary
         solve_task3(fin, fout);
+    }
 
+
+    fclose(fin);
+    fclose(fout);
     return 0;
 }
