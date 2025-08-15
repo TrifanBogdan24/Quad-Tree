@@ -168,7 +168,7 @@ void solve_task2(int factor, FILE *fin, FILE *fout)
 void write_PMM_image(RawImage *img, FILE *fout)
 {
     fprintf(fout, "P6\n");
-    fprintf(fout, "%u %u\n255\n", img->width, img->height);
+    fprintf(fout, "%u %u\n%u\n", img->width, img->height, img->max_rgb);
 
     for (int i = 0; i < img->height; i++) {
         for (int j = 0; j < img->width; j++) {
@@ -183,7 +183,6 @@ void write_PMM_image(RawImage *img, FILE *fout)
 
 void solve_task3(FILE *fin, FILE *fout)
 {
-    // TODO
     RawImage img;
     img.max_rgb = 255;
 
