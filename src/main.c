@@ -180,13 +180,6 @@ void write_PMM_image(RawImage *img, FILE *fout)
 }
 
 
-int queue_size(Queue *queue) {
-    int num = 0;
-    for (List *iter = queue->head; iter; iter = iter->next) {
-        num++;
-    }
-    return num;
-}
 
 void solve_task3(FILE *fin, FILE *fout)
 {
@@ -234,9 +227,9 @@ void solve_task3(FILE *fin, FILE *fout)
         } else {
             // Non-leaf node
             node->child_upper_left  = new_tree_node(x         , y         , size/2);
-            node->child_upper_right = new_tree_node(x + size/2, y         , size/2);
+            node->child_upper_right = new_tree_node(x, y+size/2, size/2);
             node->child_lower_right = new_tree_node(x + size/2, y + size/2, size/2);
-            node->child_lower_left  = new_tree_node(x         , y + size/2, size/2); 
+            node->child_lower_left  = new_tree_node(x + size/2,y, size/2); 
 
             queue_push(&queue, node->child_upper_left);
             queue_push(&queue, node->child_upper_right);

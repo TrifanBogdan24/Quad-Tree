@@ -1,7 +1,10 @@
 # Quad Tree
 
 
-## 
+## Formule
+
+
+### Step 1
 
 ```math
 red = \frac{1}{size \cdot size} \left( \sum_{i=x}^{x+size} \sum_{j=y}^{y+size} grid[i][j].red \right)
@@ -13,6 +16,8 @@ green = \frac{1}{size \cdot size} \left( \sum_{i=x}^{x+size} \sum_{j=y}^{y+size}
 blue = \frac{1}{size \cdot size} \left( \sum_{i=x}^{x+size} \sum_{j=y}^{y+size} grid[i][j].blue \right)
 ```
 
+
+### Step 2
 
 ```math
 mean = \frac{1}{3 \cdot size^2} 

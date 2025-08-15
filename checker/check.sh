@@ -30,7 +30,7 @@ echo "Cerința 1 - Compresia fisierelor"
 for i in {0..19}
 do
 	fileIn="tests/input/test"${TESTS[$i]}".ppm"
-	fileOut="tests/output/test.out"
+	fileOut="tests/output/test"$i"_c1.txt"
 	refOut="tests/ref/test"$i"_c1.txt"
 	./quadtree -c1 ${FACTORS[$i]} $fileIn $fileOut > /dev/null 2>&1
 	diff $fileOut $refOut > /dev/null
@@ -66,7 +66,7 @@ echo "Cerința 2 - Compresia fișierelor"
 for i in {0..19}
 do
 	fileIn="tests/input/test"${TESTS[$i]}".ppm"
-	fileOut="tests/output/test.out"
+	fileOut="tests/output/test"$i"_c2.out"
 	refOut="tests/ref/test"$i"_c2.out"
 	./quadtree -c2 ${FACTORS[$i]} $fileIn $fileOut > /dev/null 2>&1
 	diff $fileOut $refOut > /dev/null
@@ -103,7 +103,7 @@ echo "Cerința 3 - Decompresia fișierelor"
 for i in {0..19}
 do
 	fileIn="tests/input/test"$i"_c2.out"
-	fileOut="tests/output/test.ppm"
+	fileOut="tests/output/test"$i"_c3.ppm"
 	refOut="tests/ref/test"$i"_c3.ppm"
 	./quadtree -d $fileIn $fileOut > /dev/null 2>&1
 	diff $fileOut $refOut > /dev/null

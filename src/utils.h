@@ -48,7 +48,7 @@ typedef struct {
 
 QuadTree *new_tree_node(unsigned int x, unsigned  y, unsigned int size)
 {
-    QuadTree *new_node = (QuadTree *) calloc (1, sizeof(QuadTree));
+    QuadTree *new_node = (QuadTree *) malloc (sizeof(QuadTree));
     new_node->x = x;
     new_node->y = y;
     new_node->size = size;
