@@ -73,8 +73,10 @@ RawImage read_PPM_image(FILE *fin)
 void solve_task1(int factor, FILE *fin, FILE *fout)
 {
     RawImage img = read_PPM_image(fin);
-    return;
     QuadTree *root = new_tree_node(0, 0, img.height);
+
+    printf("%d\n", compute_mean(&img, 0, 0, img.height/4));
+    return;
 
     Queue *queue = new_empty_queue();
     queue_push(&queue, root);
