@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <errno.h>
 
 #define MAX(x, y) ((x > y) ? x : y)
@@ -12,20 +13,20 @@ typedef struct {
     unsigned char R;
     unsigned char G;
     unsigned char B;
-} color;
+} Color;
 
 
 typedef struct {
     unsigned int width;
     unsigned int height;
     unsigned int max_rgb;
-    color **grid;
+    Color **grid;
 } RawImage;
 
 
 typedef struct TreeNode {
     unsigned int x, y, size;
-    color pixel;
+    Color color;
     struct TreeNode *child_upper_left;     // Child 1
     struct TreeNode *child_upper_right;    // Child 2
     struct TreeNode *child_lower_right;    // Chlid 3
@@ -97,7 +98,7 @@ int get_tree_height(QuadTree *root)
 
 Queue *new_empty_queue()
 {
-    return (Queue *) malloc (sizeof(Queue));
+    return (Queue *) calloc (1, sizeof(Queue));
 }
 
 int is_empty(Queue *queue)

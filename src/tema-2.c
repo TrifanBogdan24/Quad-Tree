@@ -1,47 +1,47 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <errno.h>
 #include <string.h>
 #include "utils.h"
 
-/*
-* (x, y) -> coordinates of upper-left corner
-*/
-unsigned int compute_mean(RawImage *img, unsigned int x, unsigned int y, unsigned int size)
+#include <math.h>
+
+double compute_block_score(RawImage *img, unsigned int x, unsigned int y, unsigned int size)
 {
-    if (!size) {
-        fprintf(stderr, "[ERR] Cannot divide with size=0\n");
-        exit(EXIT_FAILURE);
-    }
+    unsigned long sumR = 0, sumG = 0, sumB = 0;
+    unsigned int i, j;
+    unsigned int count = size * size;
 
-    unsigned long long sum_R = 0;
-    unsigned long long sum_G = 0;
-    unsigned long long sum_B = 0;
-
-    for (int i = x; i < x + size; i++) {
-        for (int j = y; j < y + size; j++) {
-            sum_R += img->grid[i][j].R;
-            sum_G += img->grid[i][j].G;
-            sum_B += img->grid[i][j].B;
+    // Step 1: sum all channel values in the block
+    for (i = x; i < x + size; i++) {
+        for (j = y; j < y + size; j++) {
+            sumR += img->grid[i][j].R;
+            sumG += img->grid[i][j].G;
+            sumB += img->grid[i][j].B;
         }
     }
 
-    unsigned int mean_R = sum_R / (size * size);
-    unsigned int mean_G = sum_G / (size * size);
-    unsigned int mean_B = sum_B / (size * size);
+    // Compute averages
+    double avgR = (double)sumR / count;
+    double avgG = (double)sumG / count;
+    double avgB = (double)sumB / count;
 
-    unsigned long long sum_square_diff = 0;
+    // Step 2: compute mean squared difference
+    double sumSqDiff = 0.0;
+    for (i = x; i < x + size; i++) {
+        for (j = y; j < y + size; j++) {
+            double dr = avgR - img->grid[i][j].R;
+            double dg = avgG - img->grid[i][j].G;
+            double db = avgB - img->grid[i][j].B;
 
-
-    for (int i = x; i < x + size; i++) {
-        for (int j = y; j < y + size; j++) {
-            sum_square_diff += (mean_R - img->grid[i][j].R) * (mean_R - img->grid[i][j].R);
-            sum_square_diff += (mean_G - img->grid[i][j].G) * (mean_G - img->grid[i][j].G);
-            sum_square_diff += (mean_B - img->grid[i][j].B) * (mean_B - img->grid[i][j].B);
+            sumSqDiff += dr * dr + dg * dg + db * db;
         }
     }
 
-    return (sum_square_diff / (3 * size * size));
+    // Final mean
+    double mean = sumSqDiff / (3.0 * count);
+    return mean;
 }
 
 RawImage read_PPM_image(FILE *fin)
@@ -54,9 +54,9 @@ RawImage read_PPM_image(FILE *fin)
     fscanf(fin, "%u", &img.height);
     fscanf(fin, "%u", &img.max_rgb);
 
-    img.grid = (color **) malloc(img.height * sizeof(color *));
+    img.grid = (Color **) malloc(img.height * sizeof(Color *));
     for (int i = 0; i < img.height; i++)
-        img.grid[i] = (color *) malloc(img.width * sizeof(color));
+        img.grid[i] = (Color *) malloc(img.width * sizeof(Color));
     
     for (int i = 0; i < img.height; i++) {
         for (int j = 0; j < img.width; j++) {
@@ -70,13 +70,10 @@ RawImage read_PPM_image(FILE *fin)
 }
 
 
-void solve_task1(int factor, FILE *fin, FILE *fout)
-{
-    RawImage img = read_PPM_image(fin);
-    QuadTree *root = new_tree_node(0, 0, img.height);
 
-    printf("%d\n", compute_mean(&img, 0, 0, img.height/4));
-    return;
+QuadTree *compress_image(RawImage *img, int factor)
+{
+    QuadTree *root = new_tree_node(0, 0, img->height);
 
     Queue *queue = new_empty_queue();
     queue_push(&queue, root);
@@ -86,8 +83,7 @@ void solve_task1(int factor, FILE *fin, FILE *fout)
         unsigned int x = node->x;
         unsigned int y = node->y;
         unsigned int size = node->size;
-        unsigned int mean = compute_mean(&img, x, y, size);
-        printf("%d %d\n", size, mean);
+        double mean = compute_block_score(img, x, y, size);
 
         if (mean <= factor)
             continue;
@@ -103,14 +99,23 @@ void solve_task1(int factor, FILE *fin, FILE *fout)
         queue_push(&queue, node->child_lower_left);
     }
 
+    free(queue);
+    return root;
+}
+
+void solve_task1(int factor, FILE *fin, FILE *fout)
+{
+    RawImage img = read_PPM_image(fin);
+    QuadTree *root = compress_image(&img, factor);
 
     int num_leaves = 0;
     int max_size = 0;
+
+    Queue *queue = new_empty_queue();
     queue_push(&queue, root);
 
     while (!is_empty(queue)) {
         QuadTree *node = queue_pop(queue);
-
         if (is_leaf(node)) {
             num_leaves++;
             max_size = MAX(max_size, node->size);
@@ -123,6 +128,7 @@ void solve_task1(int factor, FILE *fin, FILE *fout)
         queue_push(&queue, node->child_lower_left);
     }
 
+    free(queue);
     fprintf(fout, "%d\n", get_tree_height(root) + 1);
     fprintf(fout, "%d\n", num_leaves);
     fprintf(fout, "%d\n", max_size);
@@ -131,7 +137,27 @@ void solve_task1(int factor, FILE *fin, FILE *fout)
 
 void solve_task2(int factor, FILE *fin, FILE *fout)
 {
-    // TODO
+    RawImage img = read_PPM_image(fin);
+    QuadTree *root = compress_image(&img, factor);
+
+    Queue *queue = new_empty_queue();
+    queue_push(&queue, root);
+
+    while (!is_empty(queue)) {
+        QuadTree *node = queue_pop(queue);
+        
+        if (is_leaf(node)) {
+            // Nod frunza
+            unsigned char type = 1;
+            fwrite(&type, sizeof(unsigned char), 1, fout);
+            fwrite(&node->color.R, sizeof(unsigned char), 1, fout);
+            fwrite(&node->color.G, sizeof(unsigned char), 1, fout);
+            fwrite(&node->color.B, sizeof(unsigned char), 1, fout);
+        } else {
+            unsigned char type = 0;
+            fwrite(&type, sizeof(unsigned char), 1, fout);
+        }
+    }
 
 }
 
