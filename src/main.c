@@ -7,7 +7,7 @@
 
 #include <math.h>
 
-double compute_block_score(RawImage *img, unsigned int x, unsigned int y, unsigned int size)
+double compute_block_score(PPM_Image *img, unsigned int x, unsigned int y, unsigned int size)
 {
     unsigned long sumR = 0, sumG = 0, sumB = 0;
     unsigned int i, j;
@@ -44,12 +44,12 @@ double compute_block_score(RawImage *img, unsigned int x, unsigned int y, unsign
     return mean;
 }
 
-RawImage read_PPM_image(FILE *fin)
+PPM_Image read_PPM_image(FILE *fin)
 {
     char type[2];
     fread(type, sizeof(char), sizeof(type), fin);
 
-    RawImage img;
+    PPM_Image img;
     fscanf(fin, "%u", &img.width);
     fscanf(fin, "%u", &img.height);
     fscanf(fin, "%u", &img.max_rgb);
@@ -72,7 +72,7 @@ RawImage read_PPM_image(FILE *fin)
 
 
 
-QuadTree *compress_image(RawImage *img, int factor)
+QuadTree *compress_image(PPM_Image *img, int factor)
 {
     QuadTree *root = new_tree_node(0, 0, img->height);
 
@@ -106,7 +106,7 @@ QuadTree *compress_image(RawImage *img, int factor)
 
 void solve_task1(int factor, FILE *fin, FILE *fout)
 {
-    RawImage img = read_PPM_image(fin);
+    PPM_Image img = read_PPM_image(fin);
     QuadTree *root = compress_image(&img, factor);
 
     int num_leaves = 0;
@@ -139,7 +139,7 @@ void solve_task1(int factor, FILE *fin, FILE *fout)
 
 void solve_task2(int factor, FILE *fin, FILE *fout)
 {
-    RawImage img = read_PPM_image(fin);
+    PPM_Image img = read_PPM_image(fin);
     QuadTree *root = compress_image(&img, factor);
 
     Queue *queue = new_empty_queue();
@@ -165,7 +165,7 @@ void solve_task2(int factor, FILE *fin, FILE *fout)
 
 }
 
-void write_PMM_image(RawImage *img, FILE *fout)
+void write_PMM_image(PPM_Image *img, FILE *fout)
 {
     fprintf(fout, "P6\n");
     fprintf(fout, "%u %u\n%u\n", img->width, img->height, img->max_rgb);
@@ -183,7 +183,7 @@ void write_PMM_image(RawImage *img, FILE *fout)
 
 void solve_task3(FILE *fin, FILE *fout)
 {
-    RawImage img;
+    PPM_Image img;
     img.max_rgb = 255;
 
 
@@ -220,6 +220,7 @@ void solve_task3(FILE *fin, FILE *fout)
             fread(&color.G, sizeof(unsigned char), 1, fin);
             fread(&color.B, sizeof(unsigned char), 1, fin);
 
+            // Fill image block with color
             for (int i = x; i < x + size; i++)
                 for (int j = y; j < y + size; j++)
                     img.grid[i][j] = color;

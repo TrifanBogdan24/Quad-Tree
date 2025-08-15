@@ -21,7 +21,7 @@ typedef struct {
     unsigned int height;
     unsigned int max_rgb;
     Color **grid;
-} RawImage;
+} PPM_Image;
 
 
 typedef struct TreeNode {
@@ -38,11 +38,11 @@ typedef struct TreeNode {
 typedef struct ListNode {
     QuadTree *root;
     struct ListNode *next;
-} List;
+} ListNode;
 
 typedef struct {
-    List *head;
-    List *tail;
+    ListNode *head;
+    ListNode *tail;
 } Queue;
 
 
@@ -59,9 +59,9 @@ QuadTree *new_tree_node(unsigned int x, unsigned  y, unsigned int size)
     return new_node;
 }
 
-List *new_list_node(QuadTree *root)
+ListNode *new_list_node(QuadTree *root)
 {
-    List *new_node = (List *) malloc (sizeof(List));
+    ListNode *new_node = (ListNode *) malloc (sizeof(ListNode));
     new_node->root = root;
     new_node->next = NULL;
     return new_node;
@@ -115,7 +115,7 @@ QuadTree *queue_pop(Queue *queue)
     }
 
     QuadTree *root = queue->head->root;
-    List *tmp = queue->head;
+    ListNode *tmp = queue->head;
     queue->head = queue->head->next;
     free(tmp);
     return root; 
