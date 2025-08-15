@@ -90,9 +90,9 @@ QuadTree *compress_image(RawImage *img, int factor)
             continue;
         
         node->child_upper_left  = new_tree_node(x         , y         , size/2);
-        node->child_upper_right = new_tree_node(x + size/2, y         , size/2);
+        node->child_upper_right = new_tree_node(x         , y + size/2, size/2);
         node->child_lower_right = new_tree_node(x + size/2, y + size/2, size/2);
-        node->child_lower_left  = new_tree_node(x         , y + size/2, size/2); 
+        node->child_lower_left  = new_tree_node(x + size/2, y         , size/2); 
 
         queue_push(&queue, node->child_upper_left);
         queue_push(&queue, node->child_upper_right);
@@ -227,9 +227,9 @@ void solve_task3(FILE *fin, FILE *fout)
         } else {
             // Non-leaf node
             node->child_upper_left  = new_tree_node(x         , y         , size/2);
-            node->child_upper_right = new_tree_node(x, y+size/2, size/2);
+            node->child_upper_right = new_tree_node(x         , y + size/2, size/2);
             node->child_lower_right = new_tree_node(x + size/2, y + size/2, size/2);
-            node->child_lower_left  = new_tree_node(x + size/2,y, size/2); 
+            node->child_lower_left  = new_tree_node(x + size/2, y         , size/2); 
 
             queue_push(&queue, node->child_upper_left);
             queue_push(&queue, node->child_upper_right);
