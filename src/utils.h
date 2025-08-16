@@ -26,7 +26,7 @@ typedef struct {
 
 typedef struct TreeNode {
     unsigned int x, y, size;                // Grid info
-    Color color;
+    Color *color;
     struct TreeNode *child_upper_left;     // Child 1
     struct TreeNode *child_upper_right;    // Child 2
     struct TreeNode *child_lower_right;    // Chlid 3
@@ -46,12 +46,21 @@ typedef struct {
 } Queue;
 
 
+void delete_image(PPM_Image *img)
+{
+    for (int i = 0; i < img->height; i++)
+        free(img->grid[i]);
+    free(img->grid);
+}
+
+
 QuadTree *new_tree_node(unsigned int x, unsigned  y, unsigned int size)
 {
     QuadTree *new_node = (QuadTree *) malloc (sizeof(QuadTree));
     new_node->x = x;
     new_node->y = y;
     new_node->size = size;
+    new_node->color = NULL;
     new_node->child_lower_left = NULL;
     new_node->child_lower_right = NULL;
     new_node->child_upper_left = NULL;
@@ -94,6 +103,22 @@ int get_tree_height(QuadTree *root)
     max_height = MAX(max_height, height_child3);
     max_height = MAX(max_height, height_child4);
     return (max_height + 1);
+}
+
+void delete_tree(QuadTree **root)
+{
+    if (!(*root))
+        return;
+    
+    QuadTree *tmp = *root;
+    delete_tree(&(*root)->child_upper_left);
+    delete_tree(&(*root)->child_upper_right);
+    delete_tree(&(*root)->child_lower_right);
+    delete_tree(&(*root)->child_lower_left);
+
+    if ((*root)->color)
+        free((*root)->color);
+    free(tmp);
 }
 
 Queue *new_empty_queue()

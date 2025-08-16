@@ -154,9 +154,9 @@ void solve_task2(int factor, FILE *fin, FILE *fout)
             // Nod frunza
             unsigned char type = 1;
             fwrite(&type, sizeof(unsigned char), 1, fout);
-            fwrite(&node->color.R, sizeof(unsigned char), 1, fout);
-            fwrite(&node->color.G, sizeof(unsigned char), 1, fout);
-            fwrite(&node->color.B, sizeof(unsigned char), 1, fout);
+            fwrite(&node->color->R, sizeof(unsigned char), 1, fout);
+            fwrite(&node->color->G, sizeof(unsigned char), 1, fout);
+            fwrite(&node->color->B, sizeof(unsigned char), 1, fout);
         } else {
             unsigned char type = 0;
             fwrite(&type, sizeof(unsigned char), 1, fout);
@@ -186,7 +186,6 @@ void solve_task3(FILE *fin, FILE *fout)
     PPM_Image img;
     img.max_rgb = 255;
 
-
     unsigned int grid_size = 0;
     fread(&grid_size, sizeof(unsigned int), 1, fin);
 
@@ -215,15 +214,15 @@ void solve_task3(FILE *fin, FILE *fout)
 
         if (node_type == 1) {
             // Leaf node
-            Color color;
-            fread(&color.R, sizeof(unsigned char), 1, fin);
-            fread(&color.G, sizeof(unsigned char), 1, fin);
-            fread(&color.B, sizeof(unsigned char), 1, fin);
+            node->color = (Color *) malloc(sizeof(Color));
+            fread(&node->color->R, sizeof(unsigned char), 1, fin);
+            fread(&node->color->G, sizeof(unsigned char), 1, fin);
+            fread(&node->color->B, sizeof(unsigned char), 1, fin);
 
             // Fill image block with color
             for (int i = x; i < x + size; i++)
                 for (int j = y; j < y + size; j++)
-                    img.grid[i][j] = color;
+                    img.grid[i][j] = *(node->color);
         } else {
             // Non-leaf node
             node->child_upper_left  = new_tree_node(x         , y         , size/2);
@@ -241,9 +240,11 @@ void solve_task3(FILE *fin, FILE *fout)
 
 
     write_PMM_image(&img, fout);
+
+    free(queue);
+    delete_tree(&root);
+    delete_image(&img);
 }
-
-
 
 
 

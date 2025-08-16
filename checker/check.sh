@@ -15,7 +15,6 @@ result=0
 bonus=0
 depunctari=0
 ZERO=0
-VALGRIND="valgrind --leak-check=full --track-origins=yes -q --log-file=rezultat_valgrind.txt"
 cd ../src
 make build > /dev/null 2>&1
 mv ./quadtree ../checker
@@ -24,6 +23,8 @@ var=10
 BEST=80
 FACTORS=(0 1000 0 3000 100 700 0 10 100 1000 50 300 0 2000 2500 5000 500 3000 0 2000)
 TESTS=(0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9 9)
+
+mkdir valgrind/
 
 #Cerința 1 - Determinarea statisticilor
 echo "Cerința 1 - Compresia fisierelor"
@@ -45,8 +46,10 @@ do
 		result=$(awk "BEGIN {print $result+1; exit}")
 		result1=$(awk "BEGIN {print $result1+1; exit}")
 		if (( i < 10)); then
-			$VALGRIND ./quadtree -c1 ${FACTORS[$i]} $fileIn $fileOut > /dev/null 2>&1
-			if [[ -z $(cat rezultat_valgrind.txt) ]]; then
+			VALGRIND_FILE="valgrind/rezultat_test"$i"_c1.txt"
+			VALGRIND_CMD="valgrind --leak-check=full --track-origins=yes -q --log-file=$VALGRIND_FILE"
+			$VALGRIND_CMD ./quadtree -c1 ${FACTORS[$i]} $fileIn $fileOut > /dev/null 2>&1
+			if [[ -z $(cat "$VALGRIND_FILE") ]]; then
 				printf "VALGRIND ........................................................... PASS\n"
 				bonus=$(echo "$bonus + 0.5" | bc -l)
 			else
@@ -81,8 +84,10 @@ do
 		result=$(echo "$result + 1.5" | bc -l)
 		result2=$(echo "$result2 + 1.5" | bc -l)
 		if (( i < 10 )); then
-			$VALGRIND ./quadtree -c2 ${FACTORS[$i]} $fileIn $fileOut > /dev/null 2>&1
-			if [[ -z $(cat rezultat_valgrind.txt) ]]; then
+			VALGRIND_FILE="valgrind/rezultat_test"$i"_c2.txt"
+			VALGRIND_CMD="valgrind --leak-check=full --track-origins=yes -q --log-file=$VALGRIND_FILE"
+			$VALGRIND_CMD ./quadtree -c2 ${FACTORS[$i]} $fileIn $fileOut > /dev/null 2>&1
+			if [[ -z $(cat "$VALGRIND_FILE") ]]; then
 				printf "VALGRIND ........................................................... PASS\n"
 				bonus=$(echo "$bonus + 0.5" | bc -l)
 			else
@@ -118,8 +123,10 @@ do
 		result=$(echo "$result + 1.5" | bc -l)
 		result3=$(echo "$result3 + 1.5" | bc -l)
 		if (( i < 10 )); then
-			$VALGRIND ./quadtree -d $fileIn $fileOut > /dev/null 2>&1
-			if [[ -z $(cat rezultat_valgrind.txt) ]]; then
+			VALGRIND_FILE="valgrind/rezultat_test"$i"_c3.txt"
+			VALGRIND_CMD="valgrind --leak-check=full --track-origins=yes -q --log-file=$VALGRIND_FILE"
+			$VALGRIND_CMD ./quadtree -d $fileIn $fileOut > /dev/null 2>&1
+			if [[ -z $(cat "$VALGRIND_FILE") ]]; then
 				printf "VALGRIND ........................................................... PASS\n"
 				bonus=$(echo "$bonus + 1.0" | bc -l)
 			else
