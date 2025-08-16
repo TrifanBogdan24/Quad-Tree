@@ -9,13 +9,10 @@
 
 Color avg_block_color(PPM_Image *img, unsigned int x, unsigned int y, unsigned int size)
 {
-    unsigned long long sum_R = 0;
-    unsigned long long sum_G = 0; 
-    unsigned long long sum_B = 0; 
+    unsigned long long sum_R = 0, sum_G = 0, sum_B = 0;
 
-
-    for (int i = x; i < x + size; i++) {
-        for (int j = y; j < y + size; j++) {
+    for (unsigned int i = x; i < x + size; i++) {
+        for (unsigned int j = y; j < y + size; j++) {
             sum_R += img->grid[i][j].R;
             sum_G += img->grid[i][j].G;
             sum_B += img->grid[i][j].B;
@@ -23,49 +20,62 @@ Color avg_block_color(PPM_Image *img, unsigned int x, unsigned int y, unsigned i
     }
 
     Color color;
-    color.R = sum_R / (size*size);
-    color.G = sum_G / (size*size);
-    color.B = sum_B / (size*size);
+    color.R = (unsigned char)(sum_R / (size * size));
+    color.G = (unsigned char)(sum_G / (size * size));
+    color.B = (unsigned char)(sum_B / (size * size));
+
     return color;
 }
 
-double compute_block_score(PPM_Image *img, unsigned int x, unsigned int y, unsigned int size)
+
+int compute_block_score(PPM_Image *img, unsigned int x, unsigned int y, unsigned int size)
 {
-    Color avg_color = avg_block_color(img, x, y, size);
+    unsigned long long sum_R = 0, sum_G = 0, sum_B = 0;
 
-    // Compute mean squared difference
-    double sumSqDiff = 0.0;
-    for (int i = x; i < x + size; i++) {
-        for (int j = y; j < y + size; j++) {
-            int dr = (int)avg_color.R - (int)img->grid[i][j].R;
-            int dg = (int)avg_color.G - (int)img->grid[i][j].G;
-            int db = (int)avg_color.B - (int)img->grid[i][j].B;
-
-            sumSqDiff += (double) (dr * dr + dg * dg + db * db);
+    for (unsigned int i = x; i < x + size; i++) {
+        for (unsigned int j = y; j < y + size; j++) {
+            sum_R += img->grid[i][j].R;
+            sum_G += img->grid[i][j].G;
+            sum_B += img->grid[i][j].B;
         }
     }
 
-    // Final mean
-    double mean = sumSqDiff / (3.0 * (double)size * (double)size);
-    return mean;
+    double mean_R = (double)sum_R / (size * size);
+    double mean_G = (double)sum_G / (size * size);
+    double mean_B = (double)sum_B / (size * size);
+
+    unsigned long long sumSqDiff = 0;
+    for (unsigned int i = x; i < x + size; i++) {
+        for (unsigned int j = y; j < y + size; j++) {
+            long long dR = (long long)img->grid[i][j].R - (long long)mean_R;
+            long long dG = (long long)img->grid[i][j].G - (long long)mean_G;
+            long long dB = (long long)img->grid[i][j].B - (long long)mean_B;
+            sumSqDiff += dR * dR + dG * dG + dB * dB;
+        }
+    }
+
+    return (int)(sumSqDiff / (3 * size * size));
 }
+
 
 PPM_Image read_PPM_image(FILE *fin)
 {
-    char type[2];
-    fread(type, sizeof(char), sizeof(type), fin);
-
+    char type[3];
+    fscanf(fin, "%2s", type);  // Read "P6"
+    
     PPM_Image img;
-    fscanf(fin, "%u", &img.width);
-    fscanf(fin, "%u", &img.height);
+    fscanf(fin, "%u %u", &img.width, &img.height);
     fscanf(fin, "%u", &img.max_rgb);
 
-    img.grid = (Color **) malloc(img.height * sizeof(Color *));
-    for (int i = 0; i < img.height; i++)
-        img.grid[i] = (Color *) malloc(img.width * sizeof(Color));
-    
-    for (int i = 0; i < img.height; i++) {
-        for (int j = 0; j < img.width; j++) {
+    fgetc(fin);   // Read new-line charcater
+
+    img.grid = malloc(img.height * sizeof(Color *));
+    for (unsigned int i = 0; i < img.height; i++)
+        img.grid[i] = malloc(img.width * sizeof(Color));
+
+    // Read RGB values from binary file
+    for (unsigned int i = 0; i < img.height; i++) {
+        for (unsigned int j = 0; j < img.width; j++) {
             fread(&img.grid[i][j].R, sizeof(unsigned char), 1, fin);
             fread(&img.grid[i][j].G, sizeof(unsigned char), 1, fin);
             fread(&img.grid[i][j].B, sizeof(unsigned char), 1, fin);
@@ -75,7 +85,33 @@ PPM_Image read_PPM_image(FILE *fin)
     return img;
 }
 
+void write_PMM_image(PPM_Image *img, FILE *fout)
+{
+    fprintf(fout, "P6\n");
+    fprintf(fout, "%u %u\n%u\n", img->width, img->height, img->max_rgb);
 
+    for (int i = 0; i < img->height; i++) {
+        for (int j = 0; j < img->width; j++) {
+            fwrite(&img->grid[i][j].R, sizeof(unsigned char), 1, fout);
+            fwrite(&img->grid[i][j].G, sizeof(unsigned char), 1, fout);
+            fwrite(&img->grid[i][j].B, sizeof(unsigned char), 1, fout);
+        }
+    }
+}
+
+
+void write_RGB_values(PPM_Image *img)
+{
+    FILE *fout = fopen("image-rgb.txt", "wt");   // Write text
+
+    for (int i = 0; i < img->height; i++) {
+        for (int j = 0; j < img->width; j++)
+            fprintf(fout, "[%d %d %d]", img->grid[i][j].R, img->grid[i][j].G, img->grid[i][j].B);
+        fprintf(fout, "\n");
+    }
+
+    fclose(fout);
+}
 
 
 QuadTree *compress_image(PPM_Image *img, int factor)
@@ -98,8 +134,6 @@ QuadTree *compress_image(PPM_Image *img, int factor)
 
             node->color = (Color *) malloc(sizeof(Color));
             *(node->color) = avg_color;     // Copies entire struct
-
-            continue;
         } else {
             // Non-leaf node
             node->child_upper_left  = new_tree_node(x         , y         , size/2);
@@ -118,6 +152,7 @@ QuadTree *compress_image(PPM_Image *img, int factor)
     free(queue);
     return root;
 }
+
 
 void solve_task1(int factor, FILE *fin, FILE *fout)
 {
@@ -189,19 +224,6 @@ void solve_task2(int factor, FILE *fin, FILE *fout)
     free(queue);
 }
 
-void write_PMM_image(PPM_Image *img, FILE *fout)
-{
-    fprintf(fout, "P6\n");
-    fprintf(fout, "%u %u\n%u\n", img->width, img->height, img->max_rgb);
-
-    for (int i = 0; i < img->height; i++) {
-        for (int j = 0; j < img->width; j++) {
-            fwrite(&img->grid[i][j].R, sizeof(unsigned char), 1, fout);
-            fwrite(&img->grid[i][j].G, sizeof(unsigned char), 1, fout);
-            fwrite(&img->grid[i][j].B, sizeof(unsigned char), 1, fout);
-        }
-    }
-}
 
 
 
