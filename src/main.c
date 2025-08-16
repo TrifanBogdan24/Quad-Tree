@@ -20,6 +20,7 @@ Color avg_block_color(PPM_Image *img, unsigned int x, unsigned int y, unsigned i
     }
 
     Color color;
+    // Compute means:
     color.R = (unsigned char)(sum_R / (size * size));
     color.G = (unsigned char)(sum_G / (size * size));
     color.B = (unsigned char)(sum_B / (size * size));
@@ -30,26 +31,14 @@ Color avg_block_color(PPM_Image *img, unsigned int x, unsigned int y, unsigned i
 
 int compute_block_score(PPM_Image *img, unsigned int x, unsigned int y, unsigned int size)
 {
-    unsigned long long sum_R = 0, sum_G = 0, sum_B = 0;
-
-    for (unsigned int i = x; i < x + size; i++) {
-        for (unsigned int j = y; j < y + size; j++) {
-            sum_R += img->grid[i][j].R;
-            sum_G += img->grid[i][j].G;
-            sum_B += img->grid[i][j].B;
-        }
-    }
-
-    double mean_R = (double)sum_R / (size * size);
-    double mean_G = (double)sum_G / (size * size);
-    double mean_B = (double)sum_B / (size * size);
+    Color avg_color = avg_block_color(img, x, y, size);
 
     unsigned long long sumSqDiff = 0;
     for (unsigned int i = x; i < x + size; i++) {
         for (unsigned int j = y; j < y + size; j++) {
-            long long dR = (long long)img->grid[i][j].R - (long long)mean_R;
-            long long dG = (long long)img->grid[i][j].G - (long long)mean_G;
-            long long dB = (long long)img->grid[i][j].B - (long long)mean_B;
+            long long dR = (long long)img->grid[i][j].R - (long long)avg_color.R;
+            long long dG = (long long)img->grid[i][j].G - (long long)avg_color.G;
+            long long dB = (long long)img->grid[i][j].B - (long long)avg_color.B;
             sumSqDiff += dR * dR + dG * dG + dB * dB;
         }
     }
@@ -126,9 +115,9 @@ QuadTree *compress_image(PPM_Image *img, int factor)
         unsigned int x = node->x;
         unsigned int y = node->y;
         unsigned int size = node->size;
-        double mean = compute_block_score(img, x, y, size);
+        int mean = compute_block_score(img, x, y, size);
 
-        if (mean <= (double)factor) {
+        if (mean <= factor) {
             // Leaf node
             Color avg_color = avg_block_color(img, x, y, size);
 
@@ -198,23 +187,29 @@ void solve_task2(int factor, FILE *fin, FILE *fout)
     Queue *queue = new_empty_queue();
     queue_push(&queue, root);
 
-    fwrite(&img.width, sizeof(unsigned int), 1, fout);
+    unsigned int grid_size = img.height;
+    fwrite(&grid_size, sizeof(unsigned int), 1, fout);
 
-    // Write tree of compressed image
+    // Write quad-tree of compressed image
     while (!is_empty(queue)) {
         QuadTree *node = queue_pop(queue);
         
         if (is_leaf(node)) {
             // Leaf node
             unsigned char type = 1;
-            fwrite(&type, sizeof(unsigned int), 1, fout);
+            fwrite(&type, sizeof(unsigned char), 1, fout);
             fwrite(&node->color->R, sizeof(unsigned char), 1, fout);
             fwrite(&node->color->G, sizeof(unsigned char), 1, fout);
             fwrite(&node->color->B, sizeof(unsigned char), 1, fout);
         } else {
             // Non-leaf node
             unsigned char type = 0;
-            fwrite(&type, sizeof(unsigned int), 1, fout);
+            fwrite(&type, sizeof(unsigned char), 1, fout);
+
+            queue_push(&queue, node->child_upper_left);
+            queue_push(&queue, node->child_upper_right);
+            queue_push(&queue, node->child_lower_right);
+            queue_push(&queue, node->child_lower_left);
         }
     }
 

@@ -2,3 +2,6 @@
 rezultat_valgrind.txt
 f.ou
 quadtree
+checker/tests/output
+checker/tests/valgrind
+
