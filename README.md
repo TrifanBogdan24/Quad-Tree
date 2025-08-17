@@ -14,7 +14,11 @@ disjuncte, iar reuniunea lor formează zona părintelui.
 Cu alte cuvinte, structura pe care o vom utiliza în cadrul acestei teme este
 un arbore în care fiecare nod neterminal are exact **4 descendenți**.
 
-## Algoritmul de compresie
+## [Algoritmul de compresie](./src/)
+
+
+> Mai multe detalii se află în [src/](./src/), alături de **implementarea algoritmului**.
+
 
 Orice imagine pătrată, de dimensiune putere a lui 2, poate fi reprezentată
 printr-un arbore cuaternar. Nodurile de pe fiecare nivel al arborelui corespund
@@ -71,18 +75,19 @@ mean = \frac{1}{3 \cdot size^2}
            + (green - grid[i][j].green)^2 
            + (blue - grid[i][j].blue)^2 \big)
 ```
+<br>
 
 > `red`, `green` și `blue` reprezintă componentele culorii medii.
 
 
-## Fisierul PPM
+## Fișierul PPM
 
 Un fișier **PPM** conține:
 1. Antet text:
    - **Linia 1:** tipul fișierului (pentru testele folosite → `P6`)
    - **Linia 2:** două numere (width și height), separate prin spațiu
    - **Linia 3:** valoarea maximă a culorii (în testele folosite → `255`)
-2. Imaginea propriu-zisă, în **format binar**.
+2. Imaginea propriu-zisă, în **format binar**
 
 > Imaginile utilizate sunt **pătratice** și au dimensiuni **putere a lui 2**.
 
@@ -99,7 +104,7 @@ P6
 
 
 
-## Fisierul comprimat
+## Fișierul comprimat
 
 Pentru arborele rezultat, se scriu valorile într-un fișier binar.
 Exemplu (în format text doar pentru lizibilitate):
@@ -122,8 +127,8 @@ Nodurile frunză sunt notate astfel:
 ```
 
 
-> ⚠️ Fișierul **comprimat real** este în format **binar**, fără aceste delimitări
-> textuale. Acest exemplu este doar pentru claritate.
+> ⚠️ Fișierul **comprimat real** este în format **binar**, fără aceste delimitări textuale.
+> Acest exemplu este doar pentru claritate.
 
 ## 🧑‍💻 Cum sa folosesti acest proiect
 
@@ -171,7 +176,7 @@ make build
 ```
 
 
-### 🧹 Curatare
+### 🧹 Curățare
 
 ```sh
 cd src/
