@@ -33,7 +33,7 @@ QuadTree *compress_image(PPM_Image *img, int factor);
 ```
 
 Funcția de compresie împarte succesiv imaginea în câte patru blocuri,
-continuând divizarea până când scorul de similaritate
+continuând divizarea până când scorul similarității
 pentru fiecare submatrice este mai mic sau egal cu factorul specificat in linia de comanda.
 
 **Pașii algoritmului**:
@@ -42,7 +42,7 @@ pentru fiecare submatrice este mai mic sau egal cu factorul specificat in linia 
 2. Radacina se adaugă în coadă
 3. Atâta timp cât coada nu este goală:
    - Se extrage primul nod
-   - Se calculează scorul de similaritate pentru blocul respectiv
+   - Se calculează scorul similarității pentru blocul respectiv
    - Dacă scorul este mai mic sau egal cu factorul, nodul devine frunză și i se alocă memorie pentru `color`
 		(se calculează culoarea medie a blocului - apel la funcția `avg_block_color()`)
    - Dacă scorul este mai mare decât factorul, nodul se extinde, creându-se cei patru copii, care se adaugă în coadă
@@ -90,12 +90,10 @@ Rezultatele se vor scrie intr-un fisier text.
 Similar cu cerința precedentă, mai întâi se încarcă în memorie imaginea originală
 și se construiește arborele cuaternar de compresie.
 
-Generarea fișierului comprimat presupune o parcurgere în lătime (**BFS**) a arborelui.
+Generarea fișierului comprimat presupune o parcurgere în lățime (**BFS**) a arborelui.
 Aceasta folosește în spate o coadă:
 - Nod intern: se scrie caracterul `0` și se adaugă copii în coadă
 - Nod frunză: se scrie `1` și valorile RGB ale nodului
-
- 
 
 
 ## 📂 Task 3: decompresie
@@ -145,5 +143,4 @@ ceea ce a salvat mult timp.
 
 Argumentele din linia de comandă sunt validate și parsate
 folosind funcții din `string.h`.
-
 
