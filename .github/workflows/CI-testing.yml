@@ -1,0 +1,44 @@
+name: Run Checker Tests
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: "Install dependencies: (valgrind)"
+        run: |
+          sudo apt update
+          sudo apt install -y python3 valgrind
+      
+      - name: Run tests on implementation
+        working-directory: ./checker
+        run: |
+          chmod +x check.sh
+          ./check.sh  2>&1 | tee test_results.txt
+      
+      - name: Run coding style cheker
+        working-directory: ./checker
+        run: |
+          chmod +x coding_style/cs.sh
+          coding_style/./cs.sh ../src/ 2>&1 | tee coding_style.txt
+      
+      - name: Upload test logs as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checker-logs
+          path: |
+            tests/test_results.txt
+            tests/coding_style.txt
+            tests/output/
+            tests/valgrind/
+          retention-days: 28
