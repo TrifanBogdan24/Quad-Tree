@@ -90,6 +90,9 @@ int is_leaf(QuadTree *root)
 }
 
 
+/*
+* DFS (Depth-First Search) tree traversal
+*/
 int get_tree_height(QuadTree *root)
 {
     if (!root)

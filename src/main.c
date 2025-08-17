@@ -174,6 +174,7 @@ void solve_task1(int factor, FILE *fin, FILE *fout)
     Queue *queue = new_empty_queue();
     queue_push(&queue, root);
 
+    // BFS (Breadth-First Search) tree traversal
     while (!is_empty(queue)) {
         QuadTree *node = queue_pop(queue);
         if (is_leaf(node)) {
@@ -201,7 +202,7 @@ void solve_task1(int factor, FILE *fin, FILE *fout)
 }
 
 /*
-* Task 2: write the binary file of a compressed PPM image
+* Task 2: write compressed PPM image to a binary file using quadtree
 */
 void solve_task2(int factor, FILE *fin, FILE *fout)
 {
@@ -214,7 +215,7 @@ void solve_task2(int factor, FILE *fin, FILE *fout)
     unsigned int grid_size = img.height;
     fwrite(&grid_size, sizeof(unsigned int), 1, fout);
 
-    // Write quad-tree of compressed image
+    // Write quadtree of compressed image in BFS order
     while (!is_empty(queue)) {
         QuadTree *node = queue_pop(queue);
         
@@ -236,7 +237,6 @@ void solve_task2(int factor, FILE *fin, FILE *fout)
             queue_push(&queue, node->child_lower_left);
         }
     }
-
 
     delete_image(&img);
     delete_tree(&root);
@@ -277,7 +277,6 @@ void solve_task3(FILE *fin, FILE *fout)
         unsigned int x = node->x;
         unsigned int y = node->y;
         unsigned int size = node->grid_size;
-
 
         if (node_type == 1) {
             // Leaf node
