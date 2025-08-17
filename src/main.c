@@ -5,10 +5,17 @@
 #include <string.h>
 #include "utils.h"
 
-#include <math.h>
-
+/*
+* (x, y)  coordinates of the upper-left corner
+* size    length and width of the (square) matrix of interest in the color grid
+*/
 Color avg_block_color(PPM_Image *img, unsigned int x, unsigned int y, unsigned int size)
 {
+    if (!size) {
+        fprintf(stderr, "[ERR] Size of the submatrix cannot be 0!\n");
+        exit(EXIT_FAILURE);
+    }
+
     unsigned long long sum_R = 0, sum_G = 0, sum_B = 0;
 
     for (unsigned int i = x; i < x + size; i++) {
@@ -20,7 +27,7 @@ Color avg_block_color(PPM_Image *img, unsigned int x, unsigned int y, unsigned i
     }
 
     Color color;
-    // Compute means:
+    // Compute average (mean) color:
     color.R = (unsigned char)(sum_R / (size * size));
     color.G = (unsigned char)(sum_G / (size * size));
     color.B = (unsigned char)(sum_B / (size * size));
@@ -28,9 +35,17 @@ Color avg_block_color(PPM_Image *img, unsigned int x, unsigned int y, unsigned i
     return color;
 }
 
-
+/*
+* (x, y)  coordinates of the upper-left corner
+* size    length and width of the (square) matrix of interest in the color grid
+*/
 int compute_block_score(PPM_Image *img, unsigned int x, unsigned int y, unsigned int size)
 {
+    if (!size) {
+        fprintf(stderr, "[ERR] Size of the submatrix cannot be 0!\n");
+        exit(EXIT_FAILURE);
+    }
+
     Color avg_color = avg_block_color(img, x, y, size);
 
     unsigned long long sumSqDiff = 0;
@@ -103,6 +118,9 @@ void write_RGB_values(PPM_Image *img)
 }
 
 
+/*
+* Builds and returns the QuadTree of an input PPM image
+*/
 QuadTree *compress_image(PPM_Image *img, int factor)
 {
     QuadTree *root = new_tree_node(0, 0, img->height);
@@ -114,7 +132,7 @@ QuadTree *compress_image(PPM_Image *img, int factor)
         QuadTree *node = queue_pop(queue);
         unsigned int x = node->x;
         unsigned int y = node->y;
-        unsigned int size = node->size;
+        unsigned int size = node->grid_size;
         int mean = compute_block_score(img, x, y, size);
 
         if (mean <= factor) {
@@ -142,14 +160,16 @@ QuadTree *compress_image(PPM_Image *img, int factor)
     return root;
 }
 
-
+/*
+* Task 1: compute statistics on the compressed PPM image
+*/
 void solve_task1(int factor, FILE *fin, FILE *fout)
 {
     PPM_Image img = read_PPM_image(fin);
     QuadTree *root = compress_image(&img, factor);
 
     int num_leaves = 0;
-    int max_size = 0;
+    int max_grid_size = 0;
 
     Queue *queue = new_empty_queue();
     queue_push(&queue, root);
@@ -157,28 +177,32 @@ void solve_task1(int factor, FILE *fin, FILE *fout)
     while (!is_empty(queue)) {
         QuadTree *node = queue_pop(queue);
         if (is_leaf(node)) {
+            // Leaf node
             num_leaves++;
-            max_size = MAX(max_size, node->size);
-            continue;
+            max_grid_size = MAX(max_grid_size, node->grid_size);
+        } else {
+            // Non-leaf node
+            queue_push(&queue, node->child_upper_left);
+            queue_push(&queue, node->child_upper_right);
+            queue_push(&queue, node->child_lower_right);
+            queue_push(&queue, node->child_lower_left);
         }
 
-        queue_push(&queue, node->child_upper_left);
-        queue_push(&queue, node->child_upper_right);
-        queue_push(&queue, node->child_lower_right);
-        queue_push(&queue, node->child_lower_left);
     }
 
 
     fprintf(fout, "%d\n", get_tree_height(root));
     fprintf(fout, "%d\n", num_leaves);
-    fprintf(fout, "%d\n", max_size);
+    fprintf(fout, "%d\n", max_grid_size);
 
     delete_image(&img);
     delete_tree(&root);
     free(queue);
 }
 
-
+/*
+* Task 2: write the binary file of a compressed PPM image
+*/
 void solve_task2(int factor, FILE *fin, FILE *fout)
 {
     PPM_Image img = read_PPM_image(fin);
@@ -221,7 +245,9 @@ void solve_task2(int factor, FILE *fin, FILE *fout)
 
 
 
-
+/*
+* Task 3: decompression, built the original PPM image
+*/
 void solve_task3(FILE *fin, FILE *fout)
 {
     PPM_Image img;
@@ -250,7 +276,7 @@ void solve_task3(FILE *fin, FILE *fout)
 
         unsigned int x = node->x;
         unsigned int y = node->y;
-        unsigned int size = node->size;
+        unsigned int size = node->grid_size;
 
 
         if (node_type == 1) {
@@ -288,7 +314,10 @@ void solve_task3(FILE *fin, FILE *fout)
 }
 
 
-
+/*
+* Throw an error and exit the program forcefully
+* if something is wrong with the command line arguments
+*/
 void check_command_line_arguments(int argc, char *argv[])
 {
     if (argc < 4 || 5 < argc) {

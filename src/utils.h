@@ -25,7 +25,7 @@ typedef struct {
 
 
 typedef struct TreeNode {
-    unsigned int x, y, size;                // Grid info
+    unsigned int x, y, grid_size;          // Grid info
     Color *color;
     struct TreeNode *child_upper_left;     // Child 1
     struct TreeNode *child_upper_right;    // Child 2
@@ -53,13 +53,16 @@ void delete_image(PPM_Image *img)
     free(img->grid);
 }
 
-
+/*
+* (x, y)  coordinates of the upper-left corner
+* size    length and width of the (square) matrix of interest in the color grid
+*/
 QuadTree *new_tree_node(unsigned int x, unsigned  y, unsigned int size)
 {
     QuadTree *new_node = (QuadTree *) malloc (sizeof(QuadTree));
     new_node->x = x;
     new_node->y = y;
-    new_node->size = size;
+    new_node->grid_size = size;
     new_node->color = NULL;
     new_node->child_lower_left = NULL;
     new_node->child_lower_right = NULL;
