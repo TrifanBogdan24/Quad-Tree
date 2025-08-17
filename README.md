@@ -2,8 +2,8 @@
 
 
 Arborele cuaternar este o structură de date care organizează informații
-multidimensionale, fiind utilizată în cartografie, procesarea imaginilor,
-grafică pe calculator etc.
+multidimensionale, **fiind utilizată** în **cartografie**, **procesarea imaginilor**,
+**grafică pe calculator** etc.
 
 Structura este un arbore ce reprezintă o zonă din spațiul N-dimensional
 (în cadrul acestui proiect, cazul N = 2). Fiecare nod al arborelui păstrează
@@ -31,9 +31,13 @@ subdivizează și nodul devine **neterminal**, având patru descendenți.
 
 Exemplu de vizualizare:
 
-![img](./README-images/img-01.png)
+<p align="center">
+    <img src="./README-images/img-01.png" height=200px width=600px>
+</p>
 
-![img](./README-images/img-02.png)
+<p align="center">
+    <img src="./README-images/img-02.png" height=400px width=600px>
+</p>
 
 
 
@@ -55,7 +59,7 @@ blue = \frac{1}{size \cdot size} \left( \sum_{i=x}^{x+size} \sum_{j=y}^{y+size} 
 ```
 
 
-### Formula pentru scorul similaritatii
+### Formula pentru scorul similarității
 
 După calcularea culorii medii, se determină **scorul de similaritate** al
 blocului, prin diferența pătratică medie între pixeli și culoarea medie.
