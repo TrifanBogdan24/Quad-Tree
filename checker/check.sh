@@ -7,7 +7,9 @@
 #	Facultatea de Automatica si Calculatoare
 #	Anul Universitar 2022-2023, Seria CD
 #/////////////////////////////////////////////////////
-rm tests/output/*
+rm -rf tests/valgrind/ tests/output/
+mkdir -p tests/valgrind/ tests/output/
+
 result1=0
 result2=0
 result3=0
@@ -23,9 +25,6 @@ var=10
 BEST=80
 FACTORS=(0 1000 0 3000 100 700 0 10 100 1000 50 300 0 2000 2500 5000 500 3000 0 2000)
 TESTS=(0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9 9)
-
-rm -rf valgrind/ output/
-mkdir valgrind/ output/
 
 
 #Cerința 1 - Determinarea statisticilor
@@ -48,7 +47,7 @@ do
 		result=$(awk "BEGIN {print $result+1; exit}")
 		result1=$(awk "BEGIN {print $result1+1; exit}")
 		if (( i < 10)); then
-			VALGRIND_FILE="valgrind/rezultat_test"$i"_c1.txt"
+			VALGRIND_FILE="tests/valgrind/rezultat_test"$i"_c1.txt"
 			VALGRIND_CMD="valgrind --leak-check=full --track-origins=yes -q --log-file=$VALGRIND_FILE"
 			$VALGRIND_CMD ./quadtree -c1 ${FACTORS[$i]} $fileIn $fileOut > /dev/null 2>&1
 			if [[ -z $(cat "$VALGRIND_FILE") ]]; then
@@ -86,7 +85,7 @@ do
 		result=$(echo "$result + 1.5" | bc -l)
 		result2=$(echo "$result2 + 1.5" | bc -l)
 		if (( i < 10 )); then
-			VALGRIND_FILE="valgrind/rezultat_test"$i"_c2.txt"
+			VALGRIND_FILE="tests/valgrind/rezultat_test"$i"_c2.txt"
 			VALGRIND_CMD="valgrind --leak-check=full --track-origins=yes -q --log-file=$VALGRIND_FILE"
 			$VALGRIND_CMD ./quadtree -c2 ${FACTORS[$i]} $fileIn $fileOut > /dev/null 2>&1
 			if [[ -z $(cat "$VALGRIND_FILE") ]]; then
@@ -125,7 +124,7 @@ do
 		result=$(echo "$result + 1.5" | bc -l)
 		result3=$(echo "$result3 + 1.5" | bc -l)
 		if (( i < 10 )); then
-			VALGRIND_FILE="valgrind/rezultat_test"$i"_c3.txt"
+			VALGRIND_FILE="tests/valgrind/rezultat_test"$i"_c3.txt"
 			VALGRIND_CMD="valgrind --leak-check=full --track-origins=yes -q --log-file=$VALGRIND_FILE"
 			$VALGRIND_CMD ./quadtree -d $fileIn $fileOut > /dev/null 2>&1
 			if [[ -z $(cat "$VALGRIND_FILE") ]]; then

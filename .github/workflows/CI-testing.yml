@@ -23,12 +23,13 @@ jobs:
         working-directory: ./checker
         run: |
           chmod +x check.sh
-          ./check.sh  2>&1 | tee test_results.txt
+          ./check.sh 2>&1 | tee test_results.txt
       
       - name: Run coding style cheker
         working-directory: ./checker
         run: |
           chmod +x coding_style/cs.sh
+          chmod +x coding_style/checkpatch.pl
           coding_style/./cs.sh ../src/ 2>&1 | tee coding_style.txt
       
       - name: Upload test logs as artifacts
@@ -37,8 +38,8 @@ jobs:
         with:
           name: checker-logs
           path: |
-            tests/test_results.txt
-            tests/coding_style.txt
-            tests/output/
-            tests/valgrind/
+            checker/test_results.txt
+            checker/coding_style.txt
+            checker/tests/output/
+            checker/tests/valgrind/
           retention-days: 28
